@@ -1,11 +1,11 @@
 package com.example.anuj.appointmentrequest;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,8 +16,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.anuj.appointmentrequest.models.doctors;
-import com.example.anuj.appointmentrequest.models.doctorsAdapter;
+import com.example.anuj.appointmentrequest.models.Booking;
+import com.example.anuj.appointmentrequest.models.BookingAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,44 +26,24 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DoctorsActivity extends AppCompatActivity {
-    CardView cardView;
+public class DocAppointment extends AppCompatActivity {
     android.support.v7.widget.Toolbar toolbar;
 
     //this is the JSON Data URL
     //make sure you are using the correct ip else it will not work
-    private static final String URL_doctors = "http://anujagrawalpm.000webhostapp.com/appointment/upload.php?apicall=getpics";
+
 
     //a list to store all the products
-    List<doctors> doctors_List;
+    List<Booking> Booking_List;
 
     //the recyclerview
-    RecyclerView recyclerView;
+    RecyclerView recyclerViewbooking;
+    SharedPreferences pref;
+    String user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_doctors);
-
-
-        AutoFitGridLayoutManager layoutManager = new AutoFitGridLayoutManager(this, 500);
-
-
-
-//        cardView=(CardView)findViewById(R.id.cardView);
-//        cardView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                startActivity(new Intent(DoctorsActivity.this, BookingActivity.class));
-//
-//
-//            }
-//        });
-
-
-
-
-
-
+        setContentView(R.layout.activity_doc_appointment);
         toolbar=(android.support.v7.widget.Toolbar)findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -108,12 +88,13 @@ public class DoctorsActivity extends AppCompatActivity {
 
 
 
-        recyclerView = findViewById(R.id.recylcerView);
-        recyclerView.setHasFixedSize(true);
+        recyclerViewbooking = findViewById(R.id.recylcerViewBooking);
+        recyclerViewbooking.setHasFixedSize(true);
 
-
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerViewbooking.setLayoutManager(mLayoutManager);
         //initializing the productlist
-        doctors_List = new ArrayList<>();
+        Booking_List = new ArrayList<>();
 
         //this method will fetch and parse json
         //to display it in recyclerview
@@ -121,46 +102,45 @@ public class DoctorsActivity extends AppCompatActivity {
 
 
 
-        recyclerView.setLayoutManager(layoutManager);
-        loadproducts();
+        loadBookings();
 
     }
 
 
-    private void loadproducts() {
+    private void loadBookings() {
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, URL_doctors,
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, "http://anujagrawalpm.000webhostapp.com/appointment/getbookings.php",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
                             //converting the string to json array object
                             JSONObject object = new JSONObject(response);
-                            JSONArray array  = object.getJSONArray("doclist");
+                            JSONArray array  = object.getJSONArray("bookings");
 
 
                             //traversing through all the object
                             for (int i = 0; i < array.length(); i++) {
 
                                 //getting product object from json array
-                                JSONObject doctors = array.getJSONObject(i);
+                                JSONObject Booking = array.getJSONObject(i);
 
                                 //adding the product to product list
-                                doctors_List.add(new doctors(
-                                        doctors.getInt("id"),
-                                        doctors.getString("title"),
-                                        doctors.getString("shortdesc"),
-                                        doctors.getString("rating"),
-                                        doctors.getString("price"),
-                                        doctors.getString("image"),
-                                        doctors.getString("longdesc")
+                                Booking_List.add(new Booking(
+                                        Booking.getInt("id"),
+                                        Booking.getString("Patient"),
+                                        Booking.getString("Doctor"),
+                                        Booking.getString("User"),
+                                        Booking.getString("Date"),
+                                        Booking.getString("Day"),
+                                        Booking.getString("Time")
 
                                 ));
                             }
 
                             //creating adapter object and setting it to recyclerview
-                            doctorsAdapter adapter = new doctorsAdapter(DoctorsActivity.this, doctors_List);
-                            recyclerView.setAdapter(adapter);
+                            BookingAdapter adapter = new BookingAdapter(DocAppointment.this, Booking_List);
+                            recyclerViewbooking.setAdapter(adapter);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -176,7 +156,6 @@ public class DoctorsActivity extends AppCompatActivity {
         //adding our stringrequest to queue
         Volley.newRequestQueue(this).add(stringRequest);
     }
-
 
 
 }

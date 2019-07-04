@@ -4,11 +4,11 @@ package com.example.anuj.appointmentrequest;
  * Created by Anuj on 18-07-2018.
  */
 
-public class Constants {
+public class Constants_hospital {
     public static final String BASE_URL = "http://anujagrawalpm.000webhostapp.com/";
-    public static final String REGISTER_OPERATION = "register";
+
     public static final String LOGIN_OPERATION = "login";
-    public static final String CHANGE_PASSWORD_OPERATION = "chgPass";
+
 
     public static final String SUCCESS = "success";
     public static final String FAILURE = "failure";

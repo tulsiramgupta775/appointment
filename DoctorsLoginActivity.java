@@ -1,24 +1,13 @@
 package com.example.anuj.appointmentrequest;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
-
-import android.os.Handler;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.AppCompatButton;
-import android.util.Log;
-import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.anuj.appointmentrequest.models.ServerRequest;
@@ -30,50 +19,33 @@ import retrofit2.Callback;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-
-
-
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener{
+public class DoctorsLoginActivity extends AppCompatActivity {
 
     private AppCompatButton btn_login;
     private EditText et_email,et_password;
-    private TextView tv_register;
+
     private ProgressBar progress;
-    private SharedPreferences pref;
+    private SharedPreferences pref2;
+
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(LoginActivity.this,HomeActivity.class));
+        startActivity(new Intent(DoctorsLoginActivity.this,HomeActivity.class));
         finish();}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_doctors_login);
+        btn_login = (AppCompatButton)findViewById(R.id.btn_login1);
 
-        btn_login = (AppCompatButton)findViewById(R.id.btn_login);
-        tv_register = (TextView)findViewById(R.id.tv_register);
-        et_email = (EditText)findViewById(R.id.et_email);
-        et_password = (EditText)findViewById(R.id.et_password);
-        pref = getApplicationContext().getSharedPreferences("MyPref",MODE_PRIVATE);
-        progress = (ProgressBar)findViewById(R.id.progress);
+        et_email = (EditText)findViewById(R.id.et_email1);
+        et_password = (EditText)findViewById(R.id.et_password1);
 
-        btn_login.setOnClickListener(this);
-        tv_register.setOnClickListener(this);
-
-    }
-
-
-
-    @Override
-    public void onClick(View v) {
-
-        switch (v.getId()){
-
-            case R.id.tv_register:
-                goToRegister();
-                break;
-
-            case R.id.btn_login:
+        progress = (ProgressBar)findViewById(R.id.progress1);
+        pref2 = getApplicationContext().getSharedPreferences("MyPref2",MODE_PRIVATE);
+        btn_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 String email = et_email.getText().toString();
                 String password = et_password.getText().toString();
 
@@ -84,16 +56,22 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     btn_login.setEnabled(false);
 
                 } else {
-                    Toast.makeText(this, "Fields are empty !", Toast.LENGTH_SHORT).show();
-                   }
-                break;
+                    Toast.makeText(DoctorsLoginActivity.this, "Fields are empty !", Toast.LENGTH_SHORT).show();
+                }
 
-        }
+
+            }
+        });
+
     }
+
+
+
+
     private void loginProcess(String email,String password){
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(Constants_hospital.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -103,32 +81,30 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         user.setEmail(email);
         user.setPassword(password);
         ServerRequest request = new ServerRequest();
-        request.setOperation(Constants.LOGIN_OPERATION);
+        request.setOperation(Constants_hospital.LOGIN_OPERATION);
         request.setUser(user);
         Call<ServerResponse> response = requestInterface.operation(request);
+
 
         response.enqueue(new Callback<ServerResponse>() {
             @Override
             public void onResponse(Call<ServerResponse> call, retrofit2.Response<ServerResponse> response) {
 
                 ServerResponse resp = response.body();
-                Toast.makeText(LoginActivity.this, resp.getMessage(), Toast.LENGTH_SHORT).show();
-                if(resp.getResult().equals(Constants.SUCCESS)){
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putBoolean(Constants.IS_LOGGED_IN,true);
-                    editor.putString(Constants.EMAIL,resp.getUser().getEmail());
-                    editor.putString(Constants.NAME,resp.getUser().getName());
-                    editor.putString(Constants.UNIQUE_ID,resp.getUser().getUnique_id());
+                Toast.makeText(DoctorsLoginActivity.this, resp.getMessage(), Toast.LENGTH_SHORT).show();
+                if(resp.getResult().equals(Constants_hospital.SUCCESS)){
+                    SharedPreferences.Editor editor = pref2.edit();
+                    editor.putBoolean(Constants_hospital.IS_LOGGED_IN,true);
+                    editor.putString(Constants_hospital.EMAIL,resp.getUser().getEmail());
+                    editor.putString(Constants_hospital.NAME,resp.getUser().getName());
+                    editor.putString(Constants_hospital.UNIQUE_ID,resp.getUser().getUnique_id());
                     editor.apply();
                     goToProfile();
 
-                }
-                else{
+                }  else{
                     btn_login.setEnabled(true);
                 }
-
                 progress.setVisibility(View.INVISIBLE);
-
             }
 
             @Override
@@ -136,21 +112,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                 progress.setVisibility(View.INVISIBLE);
 //                Log.d(Constants.TAG,"failed");
-
-                Toast.makeText(LoginActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(DoctorsLoginActivity.this, t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void goToRegister(){
 
-        startActivity(new Intent(LoginActivity.this,RegisterActivity.class));
-    }
 
     private void goToProfile(){
 
-        startActivity(new Intent(LoginActivity.this,DashboardActivity.class));
+        startActivity(new Intent(DoctorsLoginActivity.this,HospitalDashboardActivity.class));
     }
-
 }
 
